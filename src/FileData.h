@@ -38,7 +38,7 @@ enum FDstat_t {
 
 class FileData {
    public:
-    FileData(fs::FS* nfs = nullptr, const char* path = nullptr, uint8_t key = 'A', void* data = nullptr, uint16_t size = 0, uint16_t tout = 5000) {
+    FileData(fs::FS* nfs = nullptr, const char* path = nullptr, uint8_t key = 'A', void* data = nullptr, size_t size = 0, uint16_t tout = 5000) {
         setFS(nfs, path);
         setKey(key);
         setData(data, size);
@@ -57,7 +57,7 @@ class FileData {
     }
 
     // подключить данные (переменную)
-    void setData(void* data, uint16_t size) {
+    void setData(void* data, size_t size) {
         _data = data;
         _size = size;
     }
@@ -74,7 +74,7 @@ class FileData {
         if (!_fs->exists(_path)) return write();
         File file = _fs->open(_path, "r+");
         if (!file) return FD_FILE_ERR;
-        uint16_t size = file.size();
+        size_t size = file.size();
         uint8_t key = file.read();
 
         if (key == _key) {
@@ -107,9 +107,10 @@ class FileData {
         if (!_fs->exists(_path)) return FD_FILE_ERR;
         File file = _fs->open(_path, "r+");
         if (!file || file.size() <= 1) return FD_FILE_ERR;
+        
         file.read();  // skip key
-        uint16_t len = file.size() - 1;
-        for (uint16_t i = 0; i < len; i++) {
+        size_t len = file.size() - 1;
+        for (size_t i = 0; i < len; i++) {
             if (((uint8_t*)_data)[i] != file.read()) {
                 file.close();
                 return write();
@@ -168,7 +169,7 @@ class FileData {
     const char* _path;
     uint8_t _key;
     void* _data;
-    uint16_t _size;
+    size_t _size;
     uint16_t _tout;
     bool _addw = false;
 
