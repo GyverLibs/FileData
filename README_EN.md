@@ -1,242 +1,252 @@
-This is an automatic translation, may be incorrect in some places. See sources and examples!
+This is an automatic translation and may be incorrect in some places. See the source README and examples for authoritative information.
 
-# FILEDATA
-Replacing EEPROM for ESP8266/32 for storing any data in files
-- the mechanism of the automatic "flag" of the first record
-- Support for all file systems (Littlefs, Spiffs, SDFS)
-- support for any type of static data
-- Putting an entry by timeout
-- "Update" data - the file will not be rewritten if the data has not changed
+[![latest](https://img.shields.io/github/v/release/GyverLibs/FileData.svg?color=brightgreen)](https://github.com/GyverLibs/FileData/releases/latest/download/FileData.zip)
+[![PIO](https://badges.registry.platformio.org/packages/gyverlibs/library/FileData.svg)](https://registry.platformio.org/libraries/gyverlibs/FileData)
+[![Foo](https://img.shields.io/badge/Website-AlexGyver.ru-blue.svg?style=flat-square)](https://alexgyver.ru/)
+[![Foo](https://img.shields.io/badge/%E2%82%BD%24%E2%82%AC%20%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D1%80%D0%B6%D0%B0%D1%82%D1%8C-%D0%B0%D0%B2%D1%82%D0%BE%D1%80%D0%B0-orange.svg?style=flat-square)](https://alexgyver.ru/support_alex/)
+[![Foo](https://img.shields.io/badge/README-ENGLISH-blueviolet.svg?style=flat-square)](https://github-com.translate.goog/GyverLibs/FileData?_x_tr_sl=ru&_x_tr_tl=en)  
 
-## compatibility
+[![Foo](https://img.shields.io/badge/ПОДПИСАТЬСЯ-НА%20ОБНОВЛЕНИЯ-brightgreen.svg?style=social&logo=telegram&color=blue)](https://t.me/GyverLibs)
+
+# FileData
+Replace EEPROM for ESP8266/32 to store any data in files
+- Automatic "flag" mechanism of the first entry
+- Support for all file systems (LittleFS, SPIFFS, SDFS)
+- Support for all types of static data
+- Delayed timeout recording
+- “Update” data – the file will not be overwritten unless the data has changed
+
+> Note: The library stores **binary**, i.e. unreadable data. If you want to store data in a file in a readable format, use the library.[PairsFile](https://github.com/GyverLibs/Pairs)
+
+### Compatibility
 ESP8266, ESP32
 
-## Content
-- [installation] (# Install)
-- [initialization] (#init)
-- [use] (#usage)
-- [Example] (# Example)
-- [versions] (#varsions)
-- [bugs and feedback] (#fedback)
+## Contents
+- [Installation](#install)
+- [Initialization](#init)
+- [Use of use](#usage)
+- [Example](#example)
+- [Versions](#versions)
+- [Bugs and feedback](#feedback)
 
-<a id="install"> </a>
+<a id="install"></a>
 ## Installation
-- The library can be found by the name ** filleda ** and installed through the library manager in:
-    - Arduino ide
-    - Arduino ide v2
-    - Platformio
-- [download the library] (https://github.com/gyverlibs/filedata/archive/refs/heads/main.zip). Zip archive for manual installation:
-    - unpack and put in * C: \ Program Files (X86) \ Arduino \ Libraries * (Windows X64)
-    - unpack and put in * C: \ Program Files \ Arduino \ Libraries * (Windows X32)
-    - unpack and put in *documents/arduino/libraries/ *
-    - (Arduino id) Automatic installation from. Zip: * sketch/connect the library/add .Zip library ... * and specify downloaded archive
-- Read more detailed instructions for installing libraries [here] (https://alexgyver.ru/arduino-first/#%D0%A3%D1%81%D1%82%D0%B0%BD%D0%BE%BE%BE%BED0%B2%D0%BA%D0%B0_%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA)
+- The library can be found under the name **FileData** and installed through the library manager in:
+    - Arduino IDE
+    - Arduino IDE v2
+    - PlatformIO
+- [Download the library](https://github.com/GyverLibs/FileData/archive/refs/heads/main.zip).zip archive for manual installation:
+    - Unpack and put in *C:\Program Files (x86)\Arduino\libraries* (Windows x64)
+    - Unpack and put in *C:\Program Files\Arduino\libraries* (Windows x32)
+    - Unpack and put in *Documents/Arduino/libraries/ *
+    - (Arduino IDE) Automatic installation from .zip: *Sketch/Connect library/Add .ZIP library...* and specify downloaded archive
+- Read more detailed instructions for installing libraries[here](https://alexgyver.ru/arduino-first/#%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0_%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA)
 ### Update
-- I recommend always updating the library: errors and bugs are corrected in the new versions, as well as optimization and new features are added
-- through the IDE library manager: find the library how to install and click "update"
-- Manually: ** remove the folder with the old version **, and then put a new one in its place.“Replacement” cannot be done: sometimes in new versions, files that remain when replacing are deleted and can lead to errors!
+- I recommend always updating the library: new versions fix errors and bugs, as well as optimize and add new features.
+- Through the library manager IDE: find the library as when installing and click "Update"
+- Manually: **Delete the folder with the old version** and then put the new one in its place. “Replacement” can not be done: sometimes new versions delete files that will remain when replaced and can lead to errors!
 
-<a id="init"> </a>
-## initialization
+<a id="init"></a>
+## Initialization
 
-`` `CPP
-FILEDATA;
-FILEDATA (fs :: fs* fs);
-FILEDATA (fs :: fs* fs, const char* Path);
-FILEDATA (fs :: fs* fs, const char* Path, uint8_t key);
-FILEDATA (FS :: fs* fs, const char* Path, Uint8_t Key, Void* Data, Uint16_T SIZE);
-FILEDATA (FS :: fs* fs, const chaar* Path, Uint8_t Key, Void* Data, Uint16_T Size, Uint16_T Tout);
+```cpp
+FileData;
+FileData(fs::FS* fs);
+FileData(fs::FS* fs, const char* path);
+FileData(fs::FS* fs, const char* path, uint8_t key);
+FileData(fs::FS* fs, const char* path, uint8_t key, void* data, uint16_t size);
+FileData(fs::FS* fs, const char* path, uint8_t key, void* data, uint16_t size, uint16_t tout);
 
-// fs - file system, address (& littlefs, & sdfs ..)
-// Path - the path (name) of the file.It can be any, as well as the extension ("/mydata", "/data/settings.dat")
-// Key - the key of the first record.It is not recommended to set 0 and 255. It is recommended to use the characters ('a', 'f')
-// DATA - link to a variable (array, structure, class)
-// size - the size of the variable, can be conveyed as sizeof (variable)
-// Tout - Timesout updates in milliseconds (silent 5000)
-`` `
+// fs - file system, address (&LittleFS, &SDFS.)
+// path is the path (name) of the file. It can be any extension ("/myData", "/data/settings.dat")
+// The key is the first entry key. It is not recommended to set 0 and 255. It is recommended to use symbols ('A', 'F')
+// Data - reference to a variable (array, structure, class)
+// Size is the size of a variable, which can be translated as sizeof
+// tout - update timeout in milliseconds (silent 5000)
+```
 
-<a id="usage"> </a>
-## Usage
+<a id="usage"></a>
+## Use of use
 
-In ESP8266/32 EEPROM, memory is emulated from Flash memory, the implementation of Eeprom in the built -in library has the following disadvantages:
-- size is limited 4 kb
-- all indicated in `eeprom.begin ()` Memory volume is duplicated in RAM before the call `eeprom.end ()` ``
-- In case of any change in the "eeprom" memory (even the 1st byte) and the call `eeprom.commit ()` the entire sector 4 KB is completely erased and rewritten.That is, memory wear does not occur in the cells, but completely the entire EEPROM region!About 10-20 thousandCranberries of data from data counts and eeprom memory no longer
+In ESP8266/32 EEPROM, memory is emulated from Flash memory, and the implementation of EEPROM in the embedded library has the following disadvantages:
+- Size limited to 4 kB
+- All of the`EEPROM.begin()`The amount of memory is duplicated in RAM before the call`EEPROM.end()`
+- Any change in EEPROM memory (even 1 byte) and call`EEPROM.commit()`The entire 4kB sector is completely erased and overwritten. That is, memory wear does not occur on cells, but completely throughout the EEPROM area! About 10-20 thousand rewrites of data and EEPROM memory are no longer
 
-It is proposed to use the file system (for example, built -in Littlefs), which itself takes care of the rewriting of memory and is engaged in the rotation of files in the designated area, which repeatedly increases the memory resource and the reliability of data storage.It will also allow you to "download" saved data, make backups and so on.This library is an analogue [eemanager] (https://github.com/gyverlibs/eemanager) and has similar mechanisms and opportunities:
-- "Connection" of static variables of any type, the library itself will read and write their contents to the file
-- the “first launch key” mechanism - if the file does not exist or does not contain the specified key - the “default” data will be written into the file
-- the mechanism of the postponed record by timeout - after changing the data, it is enough to give the library the command to update, and it will update the data after the time of the timeout
+It is proposed to use a file system for data storage (for example, the built-in LittleFS), which itself takes care of memory overwriting and rotates files over the designated area, which greatly increases the memory resource and data storage reliability. It will also allow you to "download" stored data, make backups and so on. This library is an analogue of[EEManager](https://github.com/GyverLibs/EEManager)and has similar mechanisms and capabilities:
+- “Connect” static variables of any type, the library will read and write their contents into a file.
+- The mechanism of the "first start key" - if the file does not exist or does not contain the specified key - the file will be written "by default"
+- The mechanism of delayed recording by timeout - after changing the data, it is enough to give the library a command to update, and it will update the data after the timeout has expired
 
-`` `CPP
-// install the file system and the path to the file
-VOID setfs (fs :: fs* nfs, const char* Path);
+```cpp
+// install file system and file path
+void setFS(fs::FS* nfs, const char* path);
 
-// set the key
-VOID Setkey (Uint8_t Key);
+// key
+void setKey(uint8_t key);
 
 // connect data (variable)
-VOID Setdata (Void* Data, Uint16_T Size);
+void setData(void* data, uint16_t size);
 
-// Install the timing of records
-VOID settimeout (uint16_t tout);
+// timeline
+void setTimeout(uint16_t tout);
 
-// Read the file in the variable
-// Return: fd_fs_err/fd_file_err/fd_write/fd_add/fd_read
-Fdstat_t read ();
+// variableize
+// return: FD FS ERR/FD FILE ERR/FD WRITE/FD ADD/FD READ
+FDstat_t read();
 
-// update now
-// Return: fd_fs_err/fd_file_err/fd_write/fd_no_dif
-Fdstat_t updatatenow ();
+// update
+// FD FS ERR/FD FILE ERR/FD WRITE/FD NO DIF
+FDstat_t updateNow();
 
-// postpone the update for a given timaut
-VOID update ();
+// postpone the update to a given timeout
+void update();
 
-// ticker, upgrade data by timeout
-// Return: fd_fs_err/fd_file_err/fd_write/fd_no_dif/fd_wait/fd_idle
-Fdstat_t tick ();
+// ticker, update timeout data
+// return: FD FS ERR/FD FILE ERR/FD WRITE/FD NO DIF/FD WAIT/FD IDLE
+FDstat_t tick();
 
-// write data to the file
-// Return: fd_fs_err/fd_file_err/fd_write
-FDSTAT_T WRITE ();
+// file
+// Return: FD FS ERR/FD FILE ERR/FD WRITE
+FDstat_t write();
 
-// Reset the key
-// Return: fd_fs_err/fd_file_err/fd_reset
-Fdstat_t reset ();
+// drop off
+// Return: FD FS ERR/FD FILE ERR/FD RESET
+FDstat_t reset();
 
-// enable the data increase mode with the addition to the file without cleaning
-VOID Addwithoutwipe (Bool Addw);
+// enable data augmentation mode with addition to file without cleaning
+void addWithoutWipe(bool addw);
 
-// ======================================
-Fd_idle // 0 - idle work
-Fd_wait // 1 - expectation of a timeout
-Fd_fs_err // 2 - file system error
-Fd_file_err // 3 - file opening error
-FD_WRITE // 4 - Write data to the file
-Fd_read // 5 - reading data from a file
-Fd_add // 6 - Adding data to the file
-FD_NO_DIF // 7 - data do not differ (not recorded)
-FD_Reset // 8 - the key is discharged
-`` `
+// =====================================================
+FD_IDLE      // 0 - single work
+FD_WAIT      // 1 - waiting timeout
+FD_FS_ERR    // 2 - File system error
+FD_FILE_ERR  // 3 - file opening error
+FD_WRITE     // 4 - recording data into a file
+FD_READ      // 5 - reading data from the file
+FD_ADD       // 6 - Adding data to the file
+FD_NO_DIF    // 7 - data are not different (not recorded)
+FD_RESET     // 8 - key reset made
+```
 
-### Procedure (global data)
-To store the "settings" of the program in the global region, to always have access to them:
-1. Create a global variable and object `filledata`
-2. Pass the variable to the object
-3. Read the data `read ()` when starting
-4. Call `tick ()` in `loop ()`
-5. After changing the data, call `update ()`
-6. At the expiration of the timeout, the data themselves will be written to the file
+### Modalities (global data)
+To store the "settings" of the program in the global area, so that you can always access them:
+1. Create a global variable and object`FileData`
+2. Transmit a variable to an object
+3. Read the data`read()`launch
+4. Call in`tick()`into`loop()`
+5. After changing the data, call`update()`
+6. After the timeout, the data will be recorded in the file.
 
-> Thus, it is safe to call `update ()` several times in a row, for example, when the "configuration" changes "buttons - the data will be updated only after the input and the timeage is completed
+> So it's safe to call`update()`several times in a row, for example, when changing the "setting" buttons - the data will be updated only after the end of the input and timeout
 
 ### Procedure (local data)
-To store settings in the file and reading/changing the functions in the program:
-1. Create a variable and object `filledata`
-2. Pass the variable to the object
-3. Read the data `read ()`
-4. If the data has changed and they need to be saved - call `updatenow ()`
+To store settings in a file and read/change within functions in the program:
+1. Create a variable and an object`FileData`
+2. Transmit a variable to an object
+3. Read the data`read()`
+4. If the data has changed, it needs to be saved.`updateNow()`
 
-`` `CPP
-VOID FUNC () {
-  Data Mydata;
-  Finedata Data (& Littlefs, "/data.dat", 'a', & mydata, sizeof (mydata));
-  Data.read ();
+```cpp
+void func() {
+  Data mydata;
+  FileData data(&LittleFS, "/data.dat", 'A', &mydata, sizeof(mydata));
+  data.read();
   // ...
-  Data.updatatenow ();
+  data.updateNow();
 }
-`` `
+```
 
-### data change
-- when changing the size of the data (when changing the number of fields in the structure), a discharge will be carried out when reading - a new structure will be written into the file
-- When installing the flag `Addwithoutwipe (True)` and with ** increasing ** data size: the data of the old size will be read from the file, then new data will be added to the file (the difference with the old size).This is convenient when developing a project - adding new "settings" will not discard the old
+### Changes in data
+- When changing the data size (when changing the number of fields in the structure), a reset will be performed when reading - a new structure will be written into the file.
+- When setting the flag`addWithoutWipe(true)`and when **increase ** data size: the old size data is read from the file, then the new data will be added to the file (the difference with the old size). This is convenient when developing a project - adding new "settings" will not reset the old ones.
 
-<a id="EXAMPLE"> </a>
+<a id="example"></a>
 ## Example
 
-`` `CPP
-#include <arduino.h>
-#incLude <filleda.h>
-#include <Littlefs.h>
+```cpp
+#include <Arduino.h>
+#include <FileData.h>
+#include <LittleFS.h>
 
-Struct Data {
+struct Data {
   uint8_t val8;
   uint16_t val16;
   uint32_t val32 = 12345;
-  Chard [20];
+  char str[20];
 };
-Data Mydata;
+Data mydata;
 
-Finedata Data (& LittlefsCranberry, "/data.dat", 'b', & mydata, sizeof (mydata));
+FileData data(&LittleFS, "/data.dat", 'B', &mydata, sizeof(mydata));
 
-VOID setup () {
-  Serial.Begin (115200);
-  DELAY (1000);
-  Serial.println ();
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+  Serial.println();
 
-  Littlefs.Begin ();
+  LittleFS.begin();
   
-  // Read the data from the file to the variable
-  // at the first launch to the file, data from the structure will be written
-  Fdstat_t stat = data.read ();
+  // read data from file to variable
+  // At the first start, data from the structure will be written into the file.
+  FDstat_t stat = data.read();
 
-  Switch (stat) {
-    Case fd_fs_err: serial.println ("fs error");
-      Break;
-    Case fd_file_err: serial.println ("error");
-      Break;
-    Case fd_write: serial.println ("Data Write");
-      Break;
-    Case fd_add: serial.println ("Data Add");
-      Break;
-    Case fd_read: serial.println ("Data Read");
-      Break;
-    Default:
-      Break;
+  switch (stat) {
+    case FD_FS_ERR: Serial.println("FS Error");
+      break;
+    case FD_FILE_ERR: Serial.println("Error");
+      break;
+    case FD_WRITE: Serial.println("Data Write");
+      break;
+    case FD_ADD: Serial.println("Data Add");
+      break;
+    case FD_READ: Serial.println("Data Read");
+      break;
+    default:
+      break;
   }
 
-  Serial.println ("Data Read:");
-  Serial.println (mydata.val8);
-  Serial.println (mydata.val16);
-  Serial.println (mydata.val32);
-  Serial.println (mydata.str);
+  Serial.println("Data read:");
+  Serial.println(mydata.val8);
+  Serial.println(mydata.val16);
+  Serial.println(mydata.val32);
+  Serial.println(mydata.str);
 }
 
-VOID loop () {
-  // DATA.Tick ();// call a ticker in look
+void loop() {
+  // data.tick(); // call the ticker in the loop
   
-  // you can catch the moment of recording
-  if (Data.tick () == fd_write) serial.println ("Data updated!");
+  // can capture the moment of recording
+  if (data.tick() == FD_WRITE) Serial.println("Data updated!");
 
-  // write to the data from the port monitor
-  // and also assign the rest of the variable random values
-  if (serial.available ()) {
-    int len = serial.Readbytes (mydata.str, 20);
-    mydata.str [len] = '\ 0';
-    MyData.val8 = Random (255);
-    MyData.val16 = Random (65000);
-    Serial.println ("update");
+  // Write this line from the port monitor
+  // assigning other variables random values
+  if (Serial.available()) {
+    int len = Serial.readBytes(mydata.str, 20);
+    mydata.str[len] = '\0';
+    mydata.val8 = random(255);
+    mydata.val16 = random(65000);
+    Serial.println("Update");
 
-    // postpone the update
-    Data.update ();
+    // postpone
+    data.update();
   }
 }
-`` `
+```
 
-<a id="versions"> </a>
-## versions
-- V1.0
+<a id="versions"></a>
+## Versions
+- v1.0
 
-<a id="feedback"> </a>
-## bugs and feedback
-Create ** Issue ** when you find the bugs, and better immediately write to the mail [alex@alexgyver.ru] (mailto: alex@alexgyver.ru)
-The library is open for refinement and your ** pull Request ** 'ow!
+<a id="feedback"></a>
+## Bugs and feedback
+If you find bugs, create **Issue**, or better write to the mail immediately.[alex@alexgyver.ru](mailto:alex@alexgyver.ru)  
+The library is open for revision and your **Pull Requests*!
 
-When reporting about bugs or incorrect work of the library, it is necessary to indicate:
-- The version of the library
-- What is MK used
+When reporting bugs or incorrect work of the library, it is necessary to specify:
+- Library version
+- What is used by the IC
 - SDK version (for ESP)
-- version of Arduino ide
-- whether the built -in examples work correctly, in which the functions and designs are used, leading to a bug in your code
-- what code has been loaded, what work was expected from it and how it works in reality
-- Ideally, attach the minimum code in which the bug is observed.Not a canvas of a thousand lines, but a minimum code
+- Arduino IDE version
+- Are embedded examples that use features and designs that cause bugs in your code working correctly?
+- What code was downloaded, what work was expected from it and how it works in reality
+- Ideally, attach the minimum code in which the bug is observed. Not a canvas of a thousand lines, but a minimum code.
