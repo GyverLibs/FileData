@@ -52,8 +52,8 @@ FileData;
 FileData(fs::FS* fs);
 FileData(fs::FS* fs, const char* path);
 FileData(fs::FS* fs, const char* path, uint8_t key);
-FileData(fs::FS* fs, const char* path, uint8_t key, void* data, uint16_t size);
-FileData(fs::FS* fs, const char* path, uint8_t key, void* data, uint16_t size, uint16_t tout);
+FileData(fs::FS* fs, const char* path, uint8_t key, void* data, size_t size);
+FileData(fs::FS* fs, const char* path, uint8_t key, void* data, size_t size, uint16_t tout);
 
 // fs - файловая система, адрес (&LittleFS, &SDFS..)
 // path - путь (имя) файла. Может быть любым, как и расширение ("/myData", "/data/settings.dat")
@@ -84,7 +84,7 @@ void setFS(fs::FS* nfs, const char* path);
 void setKey(uint8_t key);
 
 // подключить данные (переменную)
-void setData(void* data, uint16_t size);
+void setData(void* data, size_t size);
 
 // установить таймаут записи
 void setTimeout(uint16_t tout);
@@ -219,7 +219,7 @@ void loop() {
   // запишем в данные строку из монитора порта
   // а также присвоим остальным переменным случайные значения
   if (Serial.available()) {
-    int len = Serial.readBytes(mydata.str, 20);
+    int len = Serial.readBytes(mydata.str, sizeof(mydata.str) - 1);
     mydata.str[len] = '\0';
     mydata.val8 = random(255);
     mydata.val16 = random(65000);

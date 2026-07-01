@@ -54,7 +54,7 @@ void loop() {
   // запишем в данные строку из монитора порта
   // а также присвоим остальным переменным случайные значения
   if (Serial.available()) {
-    int len = Serial.readBytes(mydata.str, 20);
+    int len = Serial.readBytes(mydata.str, sizeof(mydata.str) - 1);
     mydata.str[len] = '\0';
     mydata.val8 = random(255);
     mydata.val16 = random(65000);

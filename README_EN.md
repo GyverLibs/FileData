@@ -54,8 +54,8 @@ FileData;
 FileData(fs::FS* fs);
 FileData(fs::FS* fs, const char* path);
 FileData(fs::FS* fs, const char* path, uint8_t key);
-FileData(fs::FS* fs, const char* path, uint8_t key, void* data, uint16_t size);
-FileData(fs::FS* fs, const char* path, uint8_t key, void* data, uint16_t size, uint16_t tout);
+FileData(fs::FS* fs, const char* path, uint8_t key, void* data, size_t size);
+FileData(fs::FS* fs, const char* path, uint8_t key, void* data, size_t size, uint16_t tout);
 
 // fs - file system, address (&LittleFS, &SDFS.)
 // path is the path (name) of the file. It can be any extension ("/myData", "/data/settings.dat")
@@ -86,7 +86,7 @@ void setFS(fs::FS* nfs, const char* path);
 void setKey(uint8_t key);
 
 // connect data (variable)
-void setData(void* data, uint16_t size);
+void setData(void* data, size_t size);
 
 // timeline
 void setTimeout(uint16_t tout);
@@ -221,7 +221,7 @@ void loop() {
   // Write this line from the port monitor
   // assigning other variables random values
   if (Serial.available()) {
-    int len = Serial.readBytes(mydata.str, 20);
+    int len = Serial.readBytes(mydata.str, sizeof(mydata.str) - 1);
     mydata.str[len] = '\0';
     mydata.val8 = random(255);
     mydata.val16 = random(65000);

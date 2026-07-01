@@ -4,7 +4,7 @@
     GitHub: https://github.com/GyverLibs/FileData
     Возможности:
     - Механизм автоматического "флага" первой записи
-    - Поддержка всех файловых систем (LittleFS, SPIFFS, SDFS) 
+    - Поддержка всех файловых систем (LittleFS, SPIFFS, SDFS)
     - Поддержка любых типов статических данных
     - Отложенная запись по таймауту
     - "Обновление" данных - файл не перезапишется, если данные не изменились
@@ -17,8 +17,7 @@
     v1.0 - релиз
 */
 
-#ifndef _FileData_h
-#define _FileData_h
+#pragma once
 
 #include <Arduino.h>
 #include <FS.h>
@@ -70,29 +69,34 @@ class FileData {
     // прочитать файл в переменную
     // возврат: FD_FS_ERR/FD_FILE_ERR/FD_WRITE/FD_ADD/FD_READ
     FDstat_t read() {
-        if (!_fs || !_data) return FD_FS_ERR;
+        if (!_valid()) return FD_FS_ERR;
         if (!_fs->exists(_path)) return write();
+
         File file = _fs->open(_path, "r+");
         if (!file) return FD_FILE_ERR;
-        size_t size = file.size();
-        uint8_t key = file.read();
 
-        if (key == _key) {
+        size_t size = file.size();
+        int key = file.read();
+
+        if (key == _key && size) {
             if (size > _size + 1) {
                 file.close();
                 return write();
             } else if (size < _size + 1) {
                 if (_addw) {
-                    file.read((uint8_t*)_data, size - 1);
-                    file.write((uint8_t*)_data + size - 1, _size + 1 - size);
-                    return FD_ADD;
+                    size_t oldSize = size - 1;
+                    size_t read = file.read((uint8_t*)_data, oldSize);
+                    if (read != oldSize) return FD_FILE_ERR;
+
+                    file.close();
+                    return write() == FD_WRITE ? FD_ADD : FD_FILE_ERR;
                 } else {
                     file.close();
                     return write();
                 }
             } else {
-                file.read((uint8_t*)_data, size - 1);
-                return FD_READ;
+                size_t read = file.read((uint8_t*)_data, _size);
+                return read == _size ? FD_READ : FD_FILE_ERR;
             }
         } else {
             file.close();
@@ -103,15 +107,23 @@ class FileData {
     // обновить сейчас
     // возврат: FD_FS_ERR/FD_FILE_ERR/FD_WRITE/FD_NO_DIF
     FDstat_t updateNow() {
-        if (!_fs || !_data) return FD_FS_ERR;
+        _updf = false;
+        if (!_valid()) return FD_FS_ERR;
         if (!_fs->exists(_path)) return FD_FILE_ERR;
-        File file = _fs->open(_path, "r+");
-        if (!file || file.size() <= 1) return FD_FILE_ERR;
-        
-        file.read();  // skip key
-        size_t len = file.size() - 1;
-        for (size_t i = 0; i < len; i++) {
-            if (((uint8_t*)_data)[i] != file.read()) {
+
+        File file = _fs->open(_path, "r");
+        if (!file) return FD_FILE_ERR;
+
+        if (file.size() != _size + 1 || file.read() != _key) {
+            file.close();
+            return write();
+        }
+
+        for (size_t i = 0; i < _size; i++) {
+            int value = file.read();
+            if (value < 0) return FD_FILE_ERR;
+
+            if (((uint8_t*)_data)[i] != value) {
                 file.close();
                 return write();
             }
@@ -138,24 +150,26 @@ class FileData {
     // записать данные в файл
     // возврат: FD_FS_ERR/FD_FILE_ERR/FD_WRITE
     FDstat_t write() {
-        if (!_fs || !_data) return FD_FS_ERR;
+        if (!_valid()) return FD_FS_ERR;
         File file = _fs->open(_path, "w");
         if (!file) return FD_FILE_ERR;
-        file.write(_key);
-        file.write((uint8_t*)_data, _size);
-        return FD_WRITE;
+
+        bool written = file.write(_key) == 1 && file.write((const uint8_t*)_data, _size) == _size;
+        file.close();
+        return written ? FD_WRITE : FD_FILE_ERR;
     }
 
     // сбросить ключ
     // возврат: FD_FS_ERR/FD_FILE_ERR/FD_RESET
     FDstat_t reset() {
-        if (!_fs || !_data) return FD_FS_ERR;
+        if (!_valid()) return FD_FS_ERR;
         if (!_fs->exists(_path)) return FD_FILE_ERR;
+
         File file = _fs->open(_path, "r+");
         if (!file) return FD_FILE_ERR;
-        uint8_t key = file.read();
-        file.seek(0);
-        file.write(key + 1);
+
+        int key = file.read();
+        if (key < 0 || !file.seek(0) || file.write((uint8_t)(key + 1)) != 1) return FD_FILE_ERR;
         return FD_RESET;
     }
 
@@ -165,16 +179,17 @@ class FileData {
     }
 
    private:
+    bool _valid() const {
+        return _fs && _path && _path[0] && _data;
+    }
+
     fs::FS* _fs;
     const char* _path;
-    uint8_t _key;
     void* _data;
     size_t _size;
     uint16_t _tout;
-    bool _addw = false;
-
-    bool _updf = false;
     uint16_t _tmr = 0;
+    uint8_t _key;
+    bool _addw = false;
+    bool _updf = false;
 };
-
-#endif
